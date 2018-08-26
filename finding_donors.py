@@ -58,10 +58,12 @@ display(data.head(n=1))
 n_records = data.shape[0]
 
 # TODO: Number of records where individual's income is more than $50,000
-n_greater_50k = data[data['income'] == '>50K'].shape[0]
+# n_greater_50k = data[data['income'] == '>50K'].shape[0]
 
 # TODO: Number of records where individual's income is at most $50,000
-n_at_most_50k = data[data['income'] == '<=50K'].shape[0]
+# n_at_most_50k = data[data['income'] == '<=50K'].shape[0]
+
+n_at_most_50k, n_greater_50k = data.income.value_counts()
 
 # TODO: Percentage of individuals whose income is more than $50,000
 greater_percent = (n_greater_50k / n_records ) *100
@@ -188,7 +190,8 @@ print(encoded)
 
 
 # Import train_test_split
-from sklearn.cross_validation import train_test_split
+# from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 
 # Split the 'features' and 'income' data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(features_final, 
@@ -300,11 +303,11 @@ print("Naive Predictor: [Accuracy score: {:.4f}, F-score: {:.4f}]".format(accura
 # 
 # - Real-World Application: SGD can be applied in industry for evaluation of performance contribution of employee in any organization.
 # 
-# - Strength: SGD frequently updates changes in parameters of the model while training which causes pretty detailed rate of improvement. Due to the randomness, it can avoid local minima better than regular Gradient Descent.
+# - Strength: SGD frequently updates changes in parameters of the model while training which causes detailed rate of improvement. Due to the randomness, it can avoid local minima better than regular Gradient Descent.
 # 
-# - Weakness: Convergence rate is slow. Frequent updates are computationally expensive.
+# - Weakness: Convergence rate is slow and sensitive to feature scaling. Frequent updates are computationally expensive.
 # 
-# - Applicability: For the given dataset size, this model would be quite fast and converge quickly. Hence, this model could be a good candidate for this problem.
+# - Applicability: Stochastic gradient descent is a simple yet very efficient approach to fit linear models. It is particularly useful when the number of samples (and the number of features, here 103 after one-hot encoding) is very large. For the given dataset size, this model would be quite fast and converge quickly. Hence, this model could be a good candidate for this problem.
 # 
 # - References:
 # http://iosrjournals.org/iosr-jbm/papers/Vol16-issue6/Version-3/I016637780.pdf
@@ -316,11 +319,11 @@ print("Naive Predictor: [Accuracy score: {:.4f}, F-score: {:.4f}]".format(accura
 # 
 # - Real-World Application: Gradient boosting can be used in developing machine-learned ranking search engines.
 # 
-# - Strength: This algorithm build or improves the model in such a way that it complements the previously built sequence of model in an effort to correct or improve the final output of the model.
+# - Strength: This algorithm builds or improves the model in such a way that it complements the previously built sequence of model in an effort to correct or improve the final output of the model. Natural handling of data of mixed type (= heterogeneous features).
 # 
 # - Weakness: The weaknesses of this model are that it is harder to run parallely and hence are time consuming. They are also little prone to overfitting and there are more parameters to tune.
 # 
-# - Applicability: This algorithm make use of other weaker algorithms, improves them to become better by learning progress and finally combine their results to get best model.
+# - Applicability: This algorithm makes use of other weaker algorithms typically Decision Tree, improves them to become better by learning progress and finally combine their results to get best model. Our dataset has large number of features with non-linear relations between them. Decision Tree implicitly perform variable screening or feature selection. Also, non-linear relationships between parameters do not affect tree performance. Since decision tree is suitable for our dataset, using number of such trees which is improving one after another makes gradient boosting one of best suitable candidate for this dataset.
 # 
 # - References:
 # http://proceedings.mlr.press/v14/chapelle11a/chapelle11a.pdf?WT.mc_id=Blog_MachLearn_General_DI
@@ -329,13 +332,13 @@ print("Naive Predictor: [Accuracy score: {:.4f}, F-score: {:.4f}]".format(accura
 # 
 # **Logistic Regression **
 # 
-# - Real-World Application: This has many industrial application. One application in medical research is the Trauma and Injury Severity Score (TRISS), which is widely used to predict mortality in injured patients.
+# - Real-World Application: This has many industrial applications. One application in medical research is the Trauma and Injury Severity Score (TRISS), which is widely used to predict mortality in injured patients. Widely used in building neural networks in deep learning.
 # 
 # - Strength: This is simple, fast and efficient for small dataset with limited features.
 # 
 # - Weakness: Adding more features to the model can result in overfitting, which reduces the generalizability of the model beyond the data on which the model is fit. Outliers in data adversely affect the model.
 # 
-# - Applicability: This is the one of the simplest model and has number of industrial application. 
+# - Applicability: This is the one of the simplest model for binary classification (for our dataset, person earning less or equal to 50k or more than 50k). Also it is a good baseline to measure the performance of other more complex Algorithms. So choosing this one is must.
 # 
 # - References: 
 # https://www.ncbi.nlm.nih.gov/pubmed/3106646
@@ -434,9 +437,9 @@ from sklearn.ensemble import GradientBoostingClassifier
 
 
 # TODO: Initialize the three models
-clf_A = LogisticRegression()
+clf_A = LogisticRegression(random_state = 0)
 clf_B = GradientBoostingClassifier(random_state = 0)
-clf_C = SGDClassifier(max_iter = 150)
+clf_C = SGDClassifier(random_state = 0)
 
 # TODO: Calculate the number of samples for 1%, 10%, and 100% of the training data
 # HINT: samples_100 is the entire training set i.e. len(y_train)
@@ -491,11 +494,19 @@ vs.evaluate(results, accuracy, fscore)
 # **Answer: ** 
 # 
 # The Gradient Boosting algorithm in layman's terms is basically a child who always learns from mistakes and experiences. A child doing something new, first takes little steps and on getting favourable output goes on doing it. When makes mistakes, learns from it, improves the process and adds them all to experiences. There are family and teachers who supports and keep check on child so that the child stays on right path. On every step, the child is advised, suggested or even punished to become a good human being and adaptive to the society.
+# Now, here the child is Decision Tree model who is weak and has very less or no experience. The family or teachers are here a loss function which keeps check on behaviour or progress of the weak model. On every step, a little piece of advice or suggestion as different parameters build the model more optimised and suitable to the dataset as society.
 # 
-# Now, here the child is Decision Tree model who is weak and has very less or no experience. The family or teachers are here a loss function which keeps check on behaviour or progress of the weak model. On every step, a little piece of advise or suggestion as different parameters build the model more optimised and suitable to the dataset as society.
+# Being specific to the topic, Gradient boosting is a machine learning technique for regression and classification problems, which produces a prediction model in the form of an ensemble of weak prediction models, typically decision trees. So, we first understand what decision tree is with the help of our data. Let's think of three persons, first one is a student, second and third are working professionals. We categorise them into two labels earning '<=50k' or '>50k' with features as work class (working or student) and their education level (having bachelor’s degree or not). First person being student, having no source of income, we put him under label earning less than '<=50k'. 2nd person who is in working class but don't have bachelor’s degree has no good job and earn less also labelled as '<=50k'. Now 3rd person, first falls into working class category and then fall into having bachelor’s degree earns good is labelled as '>50k'. So this forms a tree like structure shown below called decision tree. Multiple number of such trees are formed "sequentially" with one learning from mistakes made by previous one. This is called boosting. It converts sequence of weak learners into very complex learners. As can be seen in below flowchart, the tree improves itself and at last results the final tree.
+# 
+# <img src="finding_donors.png" alt="" height="1000" width="800">
+# 
+# Any supervised learning algorithm has a loss function and we want it as minimum. By using gradient descent and updating our predictions based on a learning rate, we can find the values where loss function is minimum. So, we are basically updating the predictions such that the sum of our residuals is close to 0 (or minimum) and predicted values are sufficiently close to actual values. So, the intuition behind gradient boosting algorithm is to repetitively leverage the patterns in residuals and strengthen a model with weak predictions and make it better. Once we reach a stage that residuals do not have any pattern that could be modelled, we can stop modelling residuals (otherwise it might lead to overfitting). Algorithmically, we are minimizing our loss function, such that test loss reach its minima. Summing up all, we first model data with simple models and analyse data for errors. These errors signify data points that are difficult to fit by a simple model. Then for later models, we particularly focus on those hard to fit data to get them right. In the end, we combine all the predictors by giving some weights to each predictor.
 # 
 # References:
+# https://en.wikipedia.org/wiki/Gradient_boosting
 # https://machinelearningmastery.com/gentle-introduction-gradient-boosting-algorithm-machine-learning/
+# https://medium.com/mlreview/gradient-boosting-from-scratch-1e317ae4587d
+# http://explained.ai/gradient-boosting/index.html
 
 # ### Implementation: Model Tuning
 # Fine tune the chosen model. Use grid search (`GridSearchCV`) with at least one important parameter tuned with at least 3 different values. You will need to use the entire training set for this. In the code cell below, you will need to implement the following:
@@ -511,7 +522,7 @@ vs.evaluate(results, accuracy, fscore)
 # 
 # **Note:** Depending on the algorithm chosen and the parameter list, the following implementation may take some time to run!
 
-# In[12]:
+# In[11]:
 
 
 # TODO: Import 'GridSearchCV', 'make_scorer', and any other necessary libraries
@@ -615,7 +626,7 @@ print(best_clf)
 #  - Train the supervised model on the entire training set.
 #  - Extract the feature importances using `'.feature_importances_'`.
 
-# In[13]:
+# In[12]:
 
 
 # TODO: Import a supervised learning model that has 'feature_importances_'
@@ -655,7 +666,7 @@ vs.feature_plot(importances, X_train, y_train)
 # ### Feature Selection
 # How does a model perform if we only use a subset of all the available features in the data? With less features required to train, the expectation is that training and prediction time is much lower — at the cost of performance metrics. From the visualization above, we see that the top five most important features contribute more than half of the importance of **all** features present in the data. This hints that we can attempt to *reduce the feature space* and simplify the information required for the model to learn. The code cell below will use the same optimized model you found earlier, and train it on the same training set *with only the top five important features*. 
 
-# In[14]:
+# In[13]:
 
 
 # Import functionality for cloning a model
@@ -708,7 +719,7 @@ print("Model training Time Difference: {:.4f}".format(all_features_time - reduce
 # ##Before You Submit
 # You will also need run the following in order to convert the Jupyter notebook into HTML, so that your submission will include both files.
 
-# In[15]:
+# In[14]:
 
 
 get_ipython().getoutput('jupyter nbconvert *.ipynb')
